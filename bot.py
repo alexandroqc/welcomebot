@@ -13,27 +13,27 @@ from telegram.contrib.botan import Botan
 import python3pickledb as pickledb
 
 # Configuration
-BOTNAME = 'usernameofbot'
-TOKEN = 'TOKEN'
+BOTNAME = 'ngl_bienvenida_bot'
+TOKEN = ''
 BOTAN_TOKEN = 'BOTANTOKEN'
 
-help_text = 'Welcomes everyone that enters a group chat that this bot is a ' \
-            'part of. By default, only the person who invited the bot into ' \
-            'the group is able to change settings.\nCommands:\n\n' \
-            '/welcome - Set welcome message\n' \
-            '/goodbye - Set goodbye message\n' \
-            '/disable\\_goodbye - Disable the goodbye message\n' \
-            '/lock - Only the person who invited the bot can change messages\n' \
-            '/unlock - Everyone can change messages\n' \
-            '/quiet - Disable "Sorry, only the person who..." ' \
+help_text = 'Doy un mensaje de bienvenida a quienes ingresan a un grupo. ' \
+            'Por defecto, solo la persona quien me invitó ' \
+            'al grupo puede cambiar mis configuraciones.\nComandos:\n\n' \
+            '/welcome - Establece mensaje de bienvenida\n' \
+            '/goodbye - Establece mensaje de despedida\n' \
+            '/disable\\_goodbye - Deshabilita el mensaje de despedida\n' \
+            '/lock - Solo las personas quienes invitaron al bot pueden cambiar '\
+            'los mensajes\n' \
+            '/unlock - Todos pueden cambiar los mensajaes\n' \
+            '/quiet - Deshabilita "Disculpa, solo la persona quien..." ' \
             '& help messages\n' \
-            '/unquiet - Enable "Sorry, only the person who..." ' \
+            '/unquiet - Habilita "Disculpa, solo la persona quien..." ' \
             '& help messages\n\n' \
-            'You can use _$username_ and _$title_ as placeholders when setting' \
-            ' messages. [HTML formatting]' \
+            'Puedes usar _$username_ and _$title_ como marcadores cuando ' \
+            ' configuras mensajes. [HTML formatting]' \
             '(https://core.telegram.org/bots/api#formatting-options) ' \
-            'is also supported.\n' \
-            'Please [rate me](http://storebot.me/bot/jh0ker_welcomebot) :) '
+            'es soportado.'
 '''
 Create database object
 Database schema:
@@ -77,7 +77,7 @@ def check(bot, update, override_lock=None):
 
     if chat_id > 0:
         send_async(bot, chat_id=chat_id,
-                   text='Please add me to a group first!')
+                   text='Por favor, agregame a un grupo primero')
         return False
 
     locked = override_lock if override_lock is not None \
@@ -85,8 +85,8 @@ def check(bot, update, override_lock=None):
 
     if locked and db.get(chat_str + '_adm') != update.message.from_user.id:
         if not db.get(chat_str + '_quiet'):
-            send_async(bot, chat_id=chat_id, text='Sorry, only the person who '
-                                                  'invited me can do that.')
+            send_async(bot, chat_id=chat_id, text='Disculpa, solo la persona '
+                                            'quien me invitó puede hacer eso.')
         return False
 
     return True
@@ -108,7 +108,7 @@ def welcome(bot, update):
 
     # Use default message if there's no custom one set
     if text is None:
-        text = 'Hello $username! Welcome to $title %s' \
+        text = '¡Hola $username!, Te damos la bienvenida a $title %s' \
                   % Emoji.GRINNING_FACE_WITH_SMILING_EYES
 
     # Replace placeholders and send message
@@ -138,7 +138,7 @@ def goodbye(bot, update):
 
     # Use default message if there's no custom one set
     if text is None:
-        text = 'Goodbye, $username!'
+        text = 'Adios, $username!'
 
     # Replace placeholders and send message
     text = text.replace('$username',
@@ -157,14 +157,14 @@ def introduce(bot, update):
     chat_id = update.message.chat.id
     invited = update.message.from_user.id
 
-    logger.info('Invited by %s to chat %d (%s)'
+    logger.info('Invitado por %s al chat %d (%s)'
                 % (invited, chat_id, update.message.chat.title))
 
     db.set(str(chat_id) + '_adm', invited)
     db.set(str(chat_id) + '_lck', True)
 
-    text = 'Hello %s! I will now greet anyone who joins this chat with a' \
-           ' nice message %s \nCheck the /help command for more info!'\
+    text = '¡Hola %s! Saludaré a todos quienes se unan a este chat con un' \
+           ' bonito mensaje %s \nEscribe el comando /help para mas información'\
            % (update.message.chat.title,
               Emoji.GRINNING_FACE_WITH_SMILING_EYES)
     send_async(bot, chat_id=chat_id, text=text)
@@ -199,9 +199,9 @@ def set_welcome(bot, update, args):
 
     # Only continue if there's a message
     if not message:
-        send_async(bot, chat_id=chat_id, 
-                   text='You need to send a message, too! For example:\n'
-                        '<code>/welcome Hello $username, welcome to '
+        send_async(bot, chat_id=chat_id,
+                   text='Necesitarás mandar un mensaje tambien, por ejemplo:\n'
+                        '<code>/welcome Hola $username, te damos la bienvenida a '
                         '$title!</code>',
                    parse_mode=ParseMode.HTML)
         return
@@ -227,9 +227,9 @@ def set_goodbye(bot, update, args):
 
     # Only continue if there's a message
     if not message:
-        send_async(bot, chat_id=chat_id, 
-                   text='You need to send a message, too! For example:\n'
-                        '<code>/goodbye Goodbye, $username!</code>',
+        send_async(bot, chat_id=chat_id,
+                   text='Tambien necesitas mandar un mensaje, por ejemplo\n'
+                        '<code>/goodbye Adiós, $username!</code>',
                    parse_mode=ParseMode.HTML)
         return
 
@@ -251,7 +251,7 @@ def disable_goodbye(bot, update):
     # Disable goodbye message
     db.set(str(chat_id) + '_bye', False)
 
-    send_async(bot, chat_id=chat_id, text='Got it!')
+    send_async(bot, chat_id=chat_id, text='Enterado')
 
 
 def lock(bot, update):
@@ -266,7 +266,7 @@ def lock(bot, update):
     # Lock the bot for this chat
     db.set(str(chat_id) + '_lck', True)
 
-    send_async(bot, chat_id=chat_id, text='Got it!')
+    send_async(bot, chat_id=chat_id, text='Enterado')
 
 
 def quiet(bot, update):
@@ -281,7 +281,7 @@ def quiet(bot, update):
     # Lock the bot for this chat
     db.set(str(chat_id) + '_quiet', True)
 
-    send_async(bot, chat_id=chat_id, text='Got it!')
+    send_async(bot, chat_id=chat_id, text='Enterado')
 
 
 def unquiet(bot, update):
@@ -296,7 +296,7 @@ def unquiet(bot, update):
     # Lock the bot for this chat
     db.set(str(chat_id) + '_quiet', False)
 
-    send_async(bot, chat_id=chat_id, text='Got it!')
+    send_async(bot, chat_id=chat_id, text='Enterado')
 
 
 def unlock(bot, update):
@@ -311,7 +311,7 @@ def unlock(bot, update):
     # Unlock the bot for this chat
     db.set(str(chat_id) + '_lck', False)
 
-    send_async(bot, chat_id=chat_id, text='Got it!')
+    send_async(bot, chat_id=chat_id, text='Enterado')
 
 
 def empty_message(bot, update):
@@ -326,7 +326,7 @@ def empty_message(bot, update):
     if update.message.chat.id not in chats:
         chats.append(update.message.chat.id)
         db.set('chats', chats)
-        logger.info("I have been added to %d chats" % len(chats))
+        logger.info("He sido agregado a %d chats" % len(chats))
 
     if update.message.new_chat_member is not None:
         # Bot was added to a group chat
@@ -358,7 +358,7 @@ def error(bot, update, error, **kwargs):
             logger.info('Removed chat_id %s from chat list'
                         % update.message.chat_id)
         else:
-            logger.error("An error (%s) occurred: %s"
+            logger.error("Un error (%s) ocurrió: %s"
                          % (type(error), error.message))
     except:
         pass
